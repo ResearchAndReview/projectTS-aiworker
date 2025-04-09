@@ -1,7 +1,7 @@
 import logging
 from src import config
 from src.app.db.mysql import get_mysql_connection
-from src.app.mq.rabbitmq import get_rabbitMQ_connection
+from src.app.mq.rabbitmq import get_rabbitmq_connection
 
 
 def callback(ch, method, properties, body):
@@ -23,7 +23,7 @@ def main():
 
     finally:
         sqlconn.close()
-    mqconn, mqchannel = get_rabbitMQ_connection()
+    mqconn, mqchannel = get_rabbitmq_connection()
     mqchannel.queue_declare(queue='task.queue.test', durable=True)
     mqchannel.basic_consume(
         queue='task.queue.test',

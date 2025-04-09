@@ -1,0 +1,15 @@
+db:
+  mysql:
+    host:
+    port:
+    user:
+    pass:
+    database:
+
+mq:
+  rabbitmq:
+    host:
+    port:
+    vhost:
+    user:
+    pass:

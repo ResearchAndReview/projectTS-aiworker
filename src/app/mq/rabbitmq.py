@@ -1,14 +1,18 @@
 import pika
 
-def get_rabbitMQ_connection():
+from src.config import get_config
+
+
+def get_rabbitmq_connection():
+    config = get_config()
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(
-            host='#####',
-            port=0000,
-            virtual_host='######',
+            host=config['mq']['rabbitmq']['host'],
+            port=config['mq']['rabbitmq']['port'],
+            virtual_host=config['mq']['rabbitmq']['vhost'],
             credentials=pika.PlainCredentials(
-                username='#####',
-                password='######'
+                username=config['mq']['rabbitmq']['user'],
+                password=config['mq']['rabbitmq']['pass'],
             ),
         )
     )
