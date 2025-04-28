@@ -4,15 +4,15 @@ from src.config import get_config
 
 
 def get_rabbitmq_connection():
-    config = get_config()
+    config = get_config()['mq']['rabbitmq']
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(
-            host=config['mq']['rabbitmq']['host'],
-            port=config['mq']['rabbitmq']['port'],
-            virtual_host=config['mq']['rabbitmq']['vhost'],
+            host=config['host'],
+            port=config['port'],
+            virtual_host=config['vhost'],
             credentials=pika.PlainCredentials(
-                username=config['mq']['rabbitmq']['user'],
-                password=config['mq']['rabbitmq']['pass'],
+                username=config['user'],
+                password=config['pass'],
             ),
         )
     )
