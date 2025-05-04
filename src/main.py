@@ -1,30 +1,43 @@
+import json
 import logging
+import time
+
 from src import config
 from src.app.db.mysql import get_mysql_connection
 from src.app.mq.rabbitmq import get_rabbitmq_connection
 import requests
 
+
 def callback(ch, method, properties, body):
     print(f"메시지 수신됨")
+    message_body = json.loads(body.decode())
+
+    start_time = time.time()
+
+
     payload = {
-        'image': body.decode()
+        'image': message_body['imageData']
     }
     response = requests.post("https://imageocrtranslation-114606214163.asia-northeast3.run.app/ocr", json=payload)
 
+    end_time = time.time()
+
+
     ocr_json = response.json()
+    elapsed_time = end_time - start_time
+    print(f"OCR 응답 수신 {ocr_json} 걸린시간 : {elapsed_time:.3f} 초")
 
-    print(f"OCR 응답 수신 {ocr_json}")
-    payload = {
-        'originalText': ocr_json['captions'][0]['text'],
-        "translateFrom": "일본어",
-        "translateTo": "한국어"
-    }
+    for item in ocr_json['captions']:
+        payload = {
+            'originalText': item['text'],
+            'translateFrom': '일본어',
+            'translateTo': '한국어'
+        }
 
-    response2 = requests.post("https://imageocrtranslation-114606214163.asia-northeast3.run.app/translation", json=payload)
-    print(f"번역 응답 수신")
-    translation_json = response2.json()
-
-    print(f"번역된 텍스트: {translation_json}")
+        response2 = requests.post("https://imageocrtranslation-114606214163.asia-northeast3.run.app/translation", json=payload)
+        print(f"번역 응답 수신")
+        translation_json = response2.json()
+        print(f"번역된 텍스트: {translation_json}")
 
 
 
