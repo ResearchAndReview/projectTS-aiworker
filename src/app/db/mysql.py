@@ -18,3 +18,16 @@ def get_mysql_connection():
     )
 
     return conn
+
+def db_access_test(sqlconn):
+    try:
+        with sqlconn.cursor() as cursor:
+            sql = "SELECT * FROM Task ORDER BY createdAt DESC LIMIT 3"
+            cursor.execute(sql)
+
+            results = cursor.fetchall()
+            for row in results:
+                print(row)
+
+    finally:
+        sqlconn.close()
