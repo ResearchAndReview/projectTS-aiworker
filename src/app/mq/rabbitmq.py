@@ -6,9 +6,19 @@ import time
 import requests
 import logging
 
+from src.app.algorithm.node_select import select_node_for_ocr, select_node_for_trans
 from src.config import get_config
 
-def handle_ocr_task(message_body):
+def handle_ocr_task(ch, message_body):
+    target_node = select_node_for_ocr()
+    send_message_to_node(ch, target_node['id'], message_body)
+
+
+def handle_trans_task(ch, message_body):
+    target_node = select_node_for_trans()
+    send_message_to_node(ch, target_node['id'], message_body)
+
+def _handle_ocr_task(message_body):
     payload = {
         'image': message_body['imageData']
     }
@@ -25,7 +35,7 @@ def handle_ocr_task(message_body):
 
     print(notify_ocr_success_response)
 
-def handle_trans_task(message_body):
+def _handle_trans_task(message_body):
     payload = {
         'originalText': message_body['originalText'],
         'translateFrom': '일본어',
@@ -49,21 +59,18 @@ def handle_trans_task(message_body):
     requests.post(f"https://js.thxx.xyz/task/notify/trans-success?transTaskId={message_body['transTaskId']}",
                   json=payload)
 
-def handle_test(ch):
-    print("LL")
-    send_message(ch)
-
 def callback(ch, method, properties, body):
     try:
         message_body = json.loads(body.decode())
-        print(f"메시지 수신됨: {message_body}")
+        # print(f"메시지 수신됨: {message_body}")
 
         if message_body['taskType'] == 0: # OCR
-            handle_ocr_task(message_body)
+            handle_ocr_task(ch, message_body)
         elif message_body['taskType'] == 1: # 번역
-            handle_trans_task(message_body)
+            handle_trans_task(ch, message_body)
         elif message_body['taskType'] == 99:
-            handle_test(ch)
+            pass
+            #handle_test(ch)
     except Exception as e:
         traceback.print_exc()
 
@@ -98,19 +105,16 @@ def keep_consuming(mqchannel):
             print(e)
 
 
-def send_message(mqchannel):
-    message = {
-        'taskType': 0,
-        'ocrTaskId': 'test',
-        'imageData': 'test'
-    }
+def send_message_to_node(mqchannel, node_id, task):
 
-    mqchannel.queue_declare(queue='task.queue.sendtest', durable=True)
+    queue_name = f'node.{node_id}'
+
+    mqchannel.queue_declare(queue=queue_name, durable=True)
 
     mqchannel.basic_publish(
         exchange='',
-        routing_key='task.queue.sendtest',
-        body=json.dumps(message),
+        routing_key=queue_name,
+        body=json.dumps(task),
         properties=pika.BasicProperties(
             delivery_mode=2,  # 메시지를 영구적으로 저장
         )

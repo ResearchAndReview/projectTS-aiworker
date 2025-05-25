@@ -4,8 +4,12 @@ import pymysql
 
 from src.config import get_config
 
+sqlconn = None
 
 def get_mysql_connection():
+    global sqlconn
+    if sqlconn is not None:
+        return sqlconn
     config = get_config()['db']['mysql']
     conn = pymysql.connect(
         host=config['host'],
@@ -16,18 +20,18 @@ def get_mysql_connection():
         charset='utf8mb4',
         cursorclass=pymysql.cursors.DictCursor,
     )
-
+    sqlconn = conn
     return conn
 
-def db_access_test(sqlconn):
+def get_available_nodes():
     try:
-        with sqlconn.cursor() as cursor:
-            sql = "SELECT * FROM Task ORDER BY createdAt DESC LIMIT 3"
+        conn = get_mysql_connection()
+        with conn.cursor() as cursor:
+            sql = "SELECT * FROM Node JOIN SystemInfo ON Node.id=SystemInfo.nodeId ORDER BY Node.lastAlive DESC"
             cursor.execute(sql)
 
             results = cursor.fetchall()
-            for row in results:
-                print(row)
-
-    finally:
-        sqlconn.close()
+            conn.commit() # CONCURRENCY ISSUE, but AI Worker will be one, so no problem
+            return results
+    except Exception as e:
+        logging.error(e)
