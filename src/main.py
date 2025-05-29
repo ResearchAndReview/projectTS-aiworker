@@ -1,9 +1,7 @@
 import logging
+
 from src import config
-from src.app.db.mysql import get_mysql_connection, get_available_nodes
 from src.app.mq.rabbitmq import get_rabbitmq_connection, keep_consuming
-
-
 
 
 def main():

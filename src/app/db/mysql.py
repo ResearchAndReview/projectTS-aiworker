@@ -6,6 +6,7 @@ from src.config import get_config
 
 sqlconn = None
 
+
 def get_mysql_connection():
     global sqlconn
     if sqlconn is not None:
@@ -23,6 +24,7 @@ def get_mysql_connection():
     sqlconn = conn
     return conn
 
+
 def get_available_nodes():
     try:
         conn = get_mysql_connection()
@@ -31,7 +33,7 @@ def get_available_nodes():
             cursor.execute(sql)
 
             results = cursor.fetchall()
-            conn.commit() # CONCURRENCY ISSUE, but AI Worker will be one, so no problem
+            conn.commit()  # CONCURRENCY ISSUE, but AI Worker will be one, so no problem
             return results
     except Exception as e:
         logging.error(e)

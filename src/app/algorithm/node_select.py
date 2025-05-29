@@ -14,6 +14,7 @@ def select_node_for_ocr():
         return None
     return nodes[0]
 
+
 def select_node_for_trans():
     nodes = get_available_nodes()
     if len(nodes) == 0:
