@@ -67,6 +67,7 @@ def keep_consuming(mqchannel):
 
 
 def send_message_to_node(mqchannel, node_id, task):
+    logging.info(f"{node_id} 노드로 작업 전송: {task}")
     queue_name = f'node.{node_id}'
     mqchannel.queue_declare(queue=queue_name, durable=True)
     mqchannel.basic_publish(
