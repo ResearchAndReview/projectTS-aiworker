@@ -1,20 +1,43 @@
+import base64
+import io
 import json
 import logging
 import traceback
 
 import pika
+from PIL import Image
 
 from src.app.algorithm.node_select import select_node_for_ocr, select_node_for_trans
 from src.config import get_config
 
 
 def handle_ocr_task(ch, message_body):
-    target_node = select_node_for_ocr()
+    base64_string = message_body['imageData']
+    if ',' in base64_string:
+        header, base64_data = base64_string.split(',', 1)
+        print(f"데이터 URI 헤더 발견: {header}")
+        # 필요하다면 header에서 MIME 타입 등을 파싱할 수 있습니다.
+        # e.g., mime_type = header.split(';')[0].split(':')[1]
+    else:
+        # 순수 Base64 문자열이라고 가정
+        base64_data = base64_string
+    # 3. Base64 문자열을 바이너리 데이터로 디코딩
+    image_bytes = base64.b64decode(base64_data)
+    decoded_size = len(image_bytes)
+    print(f"Base64 디코딩 완료, 크기: {decoded_size} bytes")
+
+    img = Image.open(io.BytesIO(image_bytes))
+    img.verify()  # 이미지 데이터 유효성 검사
+    # verify() 후에는 다시 열어야 실제 작업 가능
+    img = Image.open(io.BytesIO(image_bytes))
+
+    target_node = select_node_for_ocr((img.width * img.height) ** 1.5)
     send_message_to_node(ch, target_node['id'], message_body)
 
 
 def handle_trans_task(ch, message_body):
-    target_node = select_node_for_trans()
+    text = message_body['originalText']
+    target_node = select_node_for_trans(len(text) ** 1.5)
     send_message_to_node(ch, target_node['id'], message_body)
 
 
