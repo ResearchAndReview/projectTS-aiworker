@@ -9,6 +9,7 @@ from PIL import Image
 
 from src.app.algorithm.node_select import select_node_for_ocr, select_node_for_trans
 from src.config import get_config
+from src.app.db.mysql import increase_ocr_task_size, increase_trans_task_size
 
 
 def handle_ocr_task(ch, message_body):
@@ -32,12 +33,14 @@ def handle_ocr_task(ch, message_body):
     img = Image.open(io.BytesIO(image_bytes))
 
     target_node = select_node_for_ocr((img.width * img.height) ** 1.5)
+    increase_ocr_task_size(target_node['id'], (img.width * img.height) ** 1.5)
     send_message_to_node(ch, target_node['id'], message_body)
 
 
 def handle_trans_task(ch, message_body):
     text = message_body['originalText']
     target_node = select_node_for_trans(len(text) ** 1.5)
+    increase_trans_task_size(target_node['id'], len(text) ** 1.5)
     send_message_to_node(ch, target_node['id'], message_body)
 
 
