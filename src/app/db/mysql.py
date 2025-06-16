@@ -29,7 +29,7 @@ def get_available_nodes():
     try:
         conn = get_mysql_connection()
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM Node JOIN SystemInfo ON Node.id=SystemInfo.nodeId ORDER BY Node.lastAlive DESC"
+            sql = "SELECT * FROM Node JOIN SystemInfo ON Node.status != 'STOPPED' and Node.id=SystemInfo.nodeId ORDER BY Node.lastAlive DESC"
             cursor.execute(sql)
 
             results = cursor.fetchall()
