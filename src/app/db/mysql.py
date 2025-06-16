@@ -47,8 +47,8 @@ def increase_ocr_task_size(nodeid, ocr_task_size):
             cursor.execute(sql, [nodeid])
             result = cursor.fetchone()
 
-            sql = "UPDATE Node SET ocr_task_size = %s WHERE id = %s"
-            cursor.execute(sql, [ result['ocr_task_size']+ocr_task_size, nodeid ])
+            sql = "UPDATE Node SET ocrTaskSize = %s WHERE id = %s"
+            cursor.execute(sql, [ result['ocrTaskSize']+ocr_task_size, nodeid ])
             conn.commit()
     except Exception as e:
         logging.error(e)
@@ -62,8 +62,8 @@ def increase_trans_task_size(nodeid, trans_task_size):
             cursor.execute(sql, [nodeid])
             result = cursor.fetchone()
 
-            sql = "UPDATE Node SET trans_task_size = %s WHERE id = %s"
-            cursor.execute(sql, [ result['trans_task_size']+trans_task_size, nodeid ])
+            sql = "UPDATE Node SET transTaskSize = %s WHERE id = %s"
+            cursor.execute(sql, [ result['transTaskSize']+trans_task_size, nodeid ])
             conn.commit()
     except Exception as e:
         logging.error(e)
